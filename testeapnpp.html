@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste APNPP - Análise de Preferências e Necessidades</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --cor-primaria: #1a2a6c;
+            --cor-secundaria: #009688;
+            --cor-acento: #f4d03f;
+            --cor-fundo-inicio: #e0eafc;
+            --cor-fundo-fim: #cfdef3;
+            --cor-texto: #333;
+            --cor-branco: rgba(255, 255, 255, 0.85);
+            --cor-sucesso: #2ecc71;
+            --cor-aviso: #e74c3c;
+            --sombra-card: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.7; margin: 0; padding: 10px;
+            background-image: linear-gradient(135deg, var(--cor-fundo-inicio) 0%, var(--cor-fundo-fim) 100%);
+            background-attachment: fixed; color: var(--cor-texto);
+        }
+        .container {
+            max-width: 850px; margin: 20px auto; padding: 30px 40px;
+            background-color: var(--cor-branco); box-shadow: var(--sombra-card);
+            border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        }
+        header { text-align: center; margin-bottom: 30px; }
+        h1 {
+            font-weight: 700; font-size: 2.5em;
+            background: linear-gradient(45deg, var(--cor-primaria), var(--cor-secundaria));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0;
+        }
+        header p { font-size: 1.1em; color: #555; font-weight: 300; }
+        .introducao {
+            text-align: center; font-size: 1.1em; padding: 15px;
+            background-color: rgba(207, 222, 243, 0.3);
+            border-radius: 8px; margin-bottom: 30px;
+        }
+        .secao { margin-bottom: 35px; border: none; padding: 0; }
+        .secao legend {
+            font-size: 1.6em; font-weight: 600; color: var(--cor-primaria);
+            width: 100%; border-bottom: 2px solid var(--cor-secundaria);
+            padding-bottom: 10px; margin-bottom: 20px;
+        }
+        .pergunta { margin-bottom: 25px; }
+        .pergunta p { font-weight: 600; margin-bottom: 15px; font-size: 1.1em; }
+        .pergunta input[type="radio"] { display: none; }
+        .pergunta label {
+            display: block; margin-bottom: 10px; cursor: pointer;
+            padding: 15px 20px; border-radius: 8px; border: 2px solid #ddd;
+            transition: all 0.3s ease; position: relative; padding-left: 50px;
+            font-weight: 400;
+        }
+        .pergunta label:before {
+            content: ''; position: absolute; left: 15px; top: 50%;
+            transform: translateY(-50%); width: 20px; height: 20px;
+            border: 2px solid #ccc; border-radius: 50%; transition: all 0.3s ease;
+        }
+        .pergunta label:hover {
+            border-color: var(--cor-secundaria);
+            background-color: rgba(0, 150, 136, 0.05);
+        }
+        .pergunta input[type="radio"]:checked + label {
+            background-color: rgba(0, 150, 136, 0.1);
+            border-color: var(--cor-secundaria); font-weight: 600;
+            color: var(--cor-primaria);
+        }
+        .pergunta input[type="radio"]:checked + label:before {
+            border-color: var(--cor-secundaria); background-color: var(--cor-secundaria);
+            background-clip: content-box; padding: 3px;
+        }
+        .botao-container { text-align: center; margin-top: 20px; }
+        button {
+            background-image: linear-gradient(45deg, var(--cor-secundaria) 0%, #00bfa5 100%);
+            color: white; border: none; padding: 15px 40px;
+            font-size: 1.3em; font-weight: 600; font-family: 'Poppins', sans-serif;
+            border-radius: 50px; cursor: pointer; transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 150, 136, 0.3);
+        }
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 150, 136, 0.4);
+        }
+        .botao-pdf {
+            background-image: linear-gradient(45deg, var(--cor-primaria) 0%, #2980b9 100%);
+            font-size: 1.1em; padding: 12px 30px; margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(26, 42, 108, 0.3);
+        }
+        #alerta {
+            display: none; color: white; background-color: var(--cor-aviso);
+            padding: 15px; border-radius: 8px; margin-bottom: 20px;
+            text-align: center; font-weight: 600;
+        }
+        #resultado {
+            margin-top: 40px; padding-top: 20px;
+            border-top: 3px solid var(--cor-secundaria);
+        }
+        .resultado-card {
+            background: #fff; border: 1px solid #eee;
+            border-left: 7px solid var(--cor-secundaria); padding: 20px 25px;
+            margin-bottom: 25px; border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .resultado-card:nth-of-type(2) { border-left-color: #3498db; }
+        .resultado-card:nth-of-type(3) { border-left-color: var(--cor-aviso); }
+        .resultado-card:nth-of-type(4) { border-left-color: var(--cor-acento); }
+        .resultado-card:nth-of-type(5) { border-left-color: var(--cor-sucesso); }
+        .resultado-card h3 { font-size: 1.5em; margin-top: 0; color: var(--cor-primaria); }
+        .tabela-contraste { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.95em; }
+        .tabela-contraste th, .tabela-contraste td { border: 1px solid #e0e0e0; padding: 12px 15px; text-align: left; }
+        .tabela-contraste th { background-color: #f5f5f5; font-weight: 600; }
+        .tabela-contraste tr.conflito { background-color: rgba(231, 76, 60, 0.1); }
+        .tabela-contraste tr.conflito strong { color: var(--cor-aviso); }
+
+        /* --- ESTILOS RESPONSIVOS PARA TELAS MENORES (CELULARES) --- */
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+            }
+            .container {
+                margin: 0;
+                padding: 20px 15px;
+                border-radius: 0;
+                border: none;
+                backdrop-filter: none; /* Remove efeito pesado para performance */
+                -webkit-backdrop-filter: none;
+            }
+            header {
+                margin-bottom: 20px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            header p, .introducao {
+                font-size: 1em;
+            }
+            .secao legend {
+                font-size: 1.3em;
+            }
+            .pergunta p {
+                font-size: 1em;
+            }
+            .pergunta label {
+                padding: 12px 15px 12px 45px;
+                font-size: 0.95em;
+            }
+            .resultado-card {
+                padding: 15px;
+            }
+            .resultado-card h3 {
+                font-size: 1.3em;
+            }
+            .tabela-contraste th, .tabela-contraste td {
+                padding: 8px 10px;
+                font-size: 0.9em;
+            }
+            button {
+                font-size: 1.1em;
+                padding: 12px 30px;
+            }
+            .botao-pdf {
+                font-size: 1em;
+            }
+        }
+
+
+        /* --- ESTILOS DE IMPRESSÃO (PARA O PDF) --- */
+        @media print {
+            body > .container > *:not(#resultado),
+            .botao-container {
+                display: none;
+            }
+            body, .container {
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+                background: none !important;
+            }
+            #resultado {
+                display: block !important;
+                margin: 0;
+                padding: 1cm;
+                border: none;
+            }
+            .resultado-card {
+                box-shadow: none;
+                border: 1px solid #ccc;
+                border-left-width: 5px;
+                background: #fff !important;
+                color: #000 !important;
+                page-break-inside: avoid;
+            }
+            h1, h3, p, li, td, th {
+                color: #000 !important;
+            }
+            .tabela-contraste tr.conflito {
+                background-color: #eee !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Teste APNPP</h1>
+            <p>Análise de Preferências e Necessidades Pessoais e Profissionais</p>
+        </header>
+
+        <div class="introducao">
+            <p><strong>Instruções:</strong> Para cada pergunta, escolha a alternativa que melhor representa você. Não há respostas certas ou erradas. Seja honesto(a) para obter a análise mais precisa.</p>
+        </div>
+
+        <form id="testeForm">
+            <fieldset class="secao">
+                <legend>Seção 1: Seu Estilo de Ação e Comunicação</legend>
+                <div class="pergunta">
+                    <p>1. Ao tomar decisões, você tende a ser mais:</p>
+                    <input type="radio" id="q1a" name="q1" value="a"><label for="q1a">Lógico(a), analítico(a) e objetivo(a), baseando-se em fatos e dados.</label>
+                    <input type="radio" id="q1b" name="q1" value="b"><label for="q1b">Empático(a), intuitivo(a) e subjetivo(a), considerando o impacto nas pessoas.</label>
+                </div>
+                <div class="pergunta">
+                    <p>2. Seu ritmo de trabalho preferido é:</p>
+                    <input type="radio" id="q2a" name="q2" value="a"><label for="q2a">Rápido, multitarefa e focado em ação imediata.</label>
+                    <input type="radio" id="q2b" name="q2" value="b"><label for="q2b">Ponderado, focado em uma tarefa de cada vez e com planejamento cuidadoso.</label>
+                </div>
+                <div class="pergunta">
+                    <p>3. Em uma conversa ou discussão, você geralmente:</p>
+                    <input type="radio" id="q3a" name="q3" value="a"><label for="q3a">É direto(a), assertivo(a) e vai direto ao ponto.</label>
+                    <input type="radio" id="q3b" name="q3" value="b"><label for="q3b">É diplomático(a), ouve diferentes pontos de vista e busca consenso.</label>
+                </div>
+                <div class="pergunta">
+                    <p>4. Em relação à organização, você prefere:</p>
+                    <input type="radio" id="q4a" name="q4" value="a"><label for="q4a">Um ambiente com flexibilidade, adaptabilidade e espaço para improviso.</label>
+                    <input type="radio" id="q4b" name="q4" value="b"><label for="q4b">Um ambiente com estrutura, clareza, regras e procedimentos definidos.</label>
+                </div>
+                <div class="pergunta">
+                    <p>5. Em um ambiente de grupo, você se sente mais energizado(a):</p>
+                    <input type="radio" id="q5a" name="q5" value="a"><label for="q5a">Interagindo ativamente, expressando suas ideias e sendo o centro das atenções.</label>
+                    <input type="radio" id="q5b" name="q5" value="b"><label for="q5b">Observando, ouvindo e processando internamente antes de se manifestar.</label>
+                </div>
+            </fieldset>
+
+            <fieldset class="secao">
+                <legend>Seção 2: Seu Ambiente Ideal (Suas Necessidades)</legend>
+                <div class="pergunta">
+                    <p>6. Para se sentir motivado(a) e apoiado(a), você precisa que as pessoas ao seu redor:</p>
+                    <input type="radio" id="q6a" name="q6" value="a"><label for="q6a">Sejam lógicas e objetivas, sem levar as coisas para o lado pessoal.</label>
+                    <input type="radio" id="q6b" name="q6" value="b"><label for="q6b">Sejam empáticas, atenciosas e demonstrem apreço por você como pessoa.</label>
+                </div>
+                <div class="pergunta">
+                    <p>7. Você precisa de um ambiente de trabalho que ofereça:</p>
+                    <input type="radio" id="q7a" name="q7" value="a"><label for="q7a">Ação constante, variedade e a oportunidade de agir rapidamente.</label>
+                    <input type="radio" id="q7b" name="q7" value="b"><label for="q7b">Tempo para pensar, refletir e planejar antes de agir.</label>
+                </div>
+                <div class="pergunta">
+                    <p>8. Para receber bem uma crítica ou feedback, você precisa que a comunicação seja:</p>
+                    <input type="radio" id="q8a" name="q8" value="a"><label for="q8a">Direta, honesta e sem rodeios.</label>
+                    <input type="radio" id="q8b" name="q8" value="b"><label for="q8b">Diplomática, sutil e apresentada com cuidado.</label>
+                </div>
+                <div class="pergunta">
+                    <p>9. Para ser produtivo(a), você precisa de:</p>
+                    <input type="radio" id="q9a" name="q9" value="a"><label for="q9a">Liberdade e autonomia para decidir como fazer seu trabalho.</label>
+                    <input type="radio" id="q9b" name="q9" value="b"><label for="q9b">Instruções claras, expectativas definidas e um plano a seguir.</label>
+                </div>
+                <div class="pergunta">
+                    <p>10. Para se sentir incluído(a) e respeitado(a), você precisa:</p>
+                    <input type="radio" id="q10a" name="q10" value="a"><label for="q10a">Que as pessoas te procurem ativamente para conversar e interagir.</label>
+                    <input type="radio" id="q10b" name="q10" value="b"><label for="q10b">Que as pessoas respeitem seu espaço e seu tempo para ficar só.</label>
+                </div>
+            </fieldset>
+
+            <fieldset class="secao">
+                <legend>Seção 3: Suas Reações sob Pressão</legend>
+                 <div class="pergunta">
+                    <p>11. Quando se sente em um ambiente excessivamente emocional ou irracional, sua tendência é:</p>
+                    <input type="radio" id="q11a" name="q11" value="a"><label for="q11a">Se tornar frio(a), excessivamente crítico(a) e impaciente com os outros.</label>
+                    <input type="radio" id="q11b" name="q11" value="b"><label for="q11b">Se sentir magoado(a) facilmente e evitar confrontos a todo custo.</label>
+                </div>
+                <div class="pergunta">
+                    <p>12. Quando é forçado(a) a trabalhar em um ritmo muito lento e burocrático, você tende a:</p>
+                    <input type="radio" id="q12a" name="q12" value="a"><label for="q12a">Ficar impaciente, agir impulsivamente e "atropelar" os processos.</label>
+                    <input type="radio" id="q12b" name="q12" value="b"><label for="q12b">Se sentir paralisado(a) pela ansiedade, procrastinar e ter dificuldade em começar.</label>
+                </div>
+                <div class="pergunta">
+                    <p>13. Quando as pessoas são muito indiretas ou vagas com você, sua reação provável é:</p>
+                    <input type="radio" id="q13a" name="q13" value="a"><label for="q13a">Se tornar excessivamente franco(a), sarcástico(a) ou até agressivo(a) verbalmente.</label>
+                    <input type="radio" id="q13b" name="q13" value="b"><label for="q13b">Se fechar, guardar ressentimentos e concordar externamente, mas discordar internamente.</label>
+                </div>
+                <div class="pergunta">
+                    <p>14. Quando está em um ambiente caótico, sem regras ou direção, você tende a:</p>
+                    <input type="radio" id="q14a" name="q14" value="a"><label for="q14a">Se tornar desorganizado(a) e ter dificuldade para focar em prioridades.</label>
+                    <input type="radio" id="q14b" name="q14" value="b"><label for="q14b">Tentar controlar tudo e todos de forma rígida e inflexível.</label>
+                </div>
+                <div class="pergunta">
+                    <p>15. Quando se sente ignorado(a) ou deixado(a) de lado, sua reação mais comum é:</p>
+                    <input type="radio" id="q15a" name="q15" value="a"><label for="q15a">Tentar chamar a atenção de forma exagerada ou se tornar inoportuno(a).</label>
+                    <input type="radio" id="q15b" name="q15" value="b"><label for="q15b">Se isolar ainda mais e se convencer de que sua presença não importa.</label>
+                </div>
+            </fieldset>
+
+            <fieldset class="secao">
+                <legend>Seção 4: Suas Fontes de Energia (Interesses)</legend>
+                 <div class="pergunta">
+                    <p>16. Você se sente mais realizado(a) quando está:</p>
+                    <input type="radio" id="q16a" name="q16" value="a"><label for="q16a">Lidando com números, dados, sistemas e resolvendo problemas lógicos.</label>
+                    <input type="radio" id="q16b" name="q16" value="b"><label for="q16b">Lidando com pessoas, ensinando, aconselhando ou ajudando os outros.</label>
+                </div>
+                <div class="pergunta">
+                    <p>17. Seu trabalho ideal envolveria principalmente:</p>
+                    <input type="radio" id="q17a" name="q17" value="a"><label for="q17a">Criar, inovar, usar a imaginação e trabalhar com formas e designs.</label>
+                    <input type="radio" id="q17b" name="q17" value="b"><label for="q17b">Persuadir, liderar, vender ideias e influenciar pessoas.</label>
+                </div>
+                <div class="pergunta">
+                    <p>18. Você tem uma afinidade natural com atividades que envolvem:</p>
+                    <input type="radio" id="q18a" name="q18" value="a"><label for="q18a">Organizar, planejar, seguir procedimentos e cuidar de detalhes.</label>
+                    <input type="radio" id="q18b" name="q18" value="b"><label for="q18b">Usar ferramentas, construir coisas ou realizar atividades ao ar livre.</label>
+                </div>
+            </fieldset>
+            
+            <div id="alerta">Por favor, responda a todas as perguntas para gerar sua análise.</div>
+
+            <div class="botao-container">
+                <button type="button" onclick="gerarAnalise()">Gerar Minha Análise APNPP</button>
+            </div>
+        </form>
+
+        <div id="resultado" style="display: none;">
+            </div>
+    </div>
+
+    <script>
+        // O JavaScript permanece o mesmo da versão anterior, é 100% compatível.
+        function gerarAnalise() {
+            const form = document.getElementById('testeForm');
+            const formData = new FormData(form);
+            const respostas = {};
+            let todasRespondidas = true;
+
+            for (let i = 1; i <= 18; i++) {
+                if (formData.has(`q${i}`)) {
+                    respostas[`q${i}`] = formData.get(`q${i}`);
+                } else {
+                    todasRespondidas = false;
+                    break;
+                }
+            }
+            
+            const alertaDiv = document.getElementById('alerta');
+            if (!todasRespondidas) {
+                alertaDiv.style.display = 'block';
+                window.scrollTo({ top: alertaDiv.offsetTop - 60, behavior: 'smooth' });
+                return;
+            }
+            alertaDiv.style.display = 'none';
+
+            const dadosAnalise = processarAnalise(respostas);
+
+            const resultadoHTML = `
+                <div class="resultado-card"><h3>🎯 Retrato Geral: ${dadosAnalise.titulo}</h3>${dadosAnalise.retratoGeral}</div>
+                <div class="resultado-card"><h3>🔄 A Dinâmica Principal: Comportamento vs. Necessidade</h3><p>Esta tabela compara o que você mostra ao mundo com o que você precisa para se sentir bem e produtivo. É a parte mais importante da sua análise.</p>${dadosAnalise.tabelaContrasteHTML}${dadosAnalise.analiseConflitos}</div>
+                <div class="resultado-card"><h3>⚡️ Seus Gatilhos de Estresse</h3>${dadosAnalise.analiseEstresse}</div>
+                <div class="resultado-card"><h3>💡 Suas Fontes de Energia e Interesses</h3>${dadosAnalise.interesses}</div>
+                <div class="resultado-card"><h3>🚀 Recomendações e Plano de Ação</h3>${dadosAnalise.recomendacoes}</div>
+                <div class="botao-container">
+                    <button class="botao-pdf" onclick="imprimirResultado()">Salvar Resultado em PDF</button>
+                </div>
+            `;
+
+            const resultadoDiv = document.getElementById('resultado');
+            resultadoDiv.innerHTML = resultadoHTML;
+            resultadoDiv.style.display = 'block';
+            window.scrollTo({ top: resultadoDiv.offsetTop - 60, behavior: 'smooth' });
+        }
+
+        function processarAnalise(respostas) {
+            const textos = { /* Objeto de textos completo aqui */ 
+                q1: { a: "lógico(a) e analítico(a)", b: "empático(a) e intuitivo(a)" }, q2: { a: "rápido(a) e multitarefa", b: "ponderado(a) e focado(a)" }, q3: { a: "direto(a) e assertivo(a)", b: "diplomático(a) e conciliador(a)" }, q4: { a: "flexível e adaptável", b: "estruturado(a) e metódico(a)" }, q5: { a: "expansivo(a) e interativo(a)", b: "observador(a) e reflexivo(a)" },
+                q6: { a: "lógica e objetividade", b: "empatia e apreciação pessoal" }, q7: { a: "ação constante e variedade", b: "tempo para pensar e planejar" }, q8: { a: "comunicação direta e honesta", b: "comunicação sutil e cuidadosa" }, q9: { a: "liberdade e autonomia", b: "instruções claras e um plano" }, q10: { a: "ser procurado(a) ativamente", b: "respeito ao seu espaço pessoal" },
+                q11: { a: "torna-se frio(a) e crítico(a)", b: "evita o confronto e se magoa" }, q12: { a: "age de forma impulsiva", b: "procrastina e se sente paralisado(a)" }, q13: { a: "torna-se excessivamente franco(a) ou sarcástico(a)", b: "fecha-se e guarda ressentimentos" }, q14: { a: "torna-se desorganizado(a)", b: "tenta controlar tudo de forma rígida" }, q15: { a: "tenta chamar a atenção de forma exagerada", b: "isola-se ainda mais" },
+                q16: { a: "Resolver problemas lógicos com dados e sistemas.", b: "Ajudar, ensinar e se conectar com pessoas." }, q17: { a: "Criar, inovar e trabalhar com o lado estético.", b: "Persuadir, liderar e influenciar pessoas." }, q18: { a: "Organizar, planejar e cuidar de detalhes.", b: "Construir, usar ferramentas e atividades práticas." }
+            };
+
+            let titulo = "";
+            if (respostas.q1 === 'b' && respostas.q4 === 'b') titulo = "O(A) Organizador(a) Empático(a)"; else if (respostas.q1 === 'a' && respostas.q2 === 'a') titulo = "O(A) Executor(a) Racional"; else if (respostas.q3 === 'b' && respostas.q5 === 'b') titulo = "O(A) Estrategista Ponderado(a)"; else if (respostas.q3 === 'a' && respostas.q4 === 'a') titulo = "O(A) Pioneiro(a) Adaptável"; else if (respostas.q1 === 'b' && respostas.q2 === 'a') titulo = "O(A) Mobilizador(a) de Pessoas"; else titulo = "O(A) Analista Versátil";
+
+            const retratoGeral = `<p>No seu comportamento visível, você se apresenta como alguém <strong>${textos.q2[respostas.q2]}</strong>, que prefere um ambiente <strong>${textos.q4[respostas.q4]}</strong>. Em suas interações, você tende a ser <strong>${textos.q3[respostas.q3]}</strong> e toma decisões de forma mais <strong>${textos.q1[respostas.q1]}</strong>. Socialmente, seu estilo é mais <strong>${textos.q5[respostas.q5]}</strong>.</p><p>O ponto chave da sua análise está em comparar este comportamento com suas necessidades internas, que podem ou não estar alinhadas, gerando harmonia ou estresse.</p>`;
+            
+            let tabelaContrasteHTML = `<table class="tabela-contraste"><tr><th>Dimensão</th><th>Seu Comportamento Usual</th><th>Sua Necessidade</th></tr>`;
+            const dimensoes = [
+                { id: 1, nome: "Tomada de Decisão", comp: 'q1', nec: 'q6' }, { id: 2, nome: "Ritmo e Ação", comp: 'q2', nec: 'q7' }, { id: 3, nome: "Comunicação", comp: 'q3', nec: 'q8' },
+                { id: 4, nome: "Estrutura", comp: 'q4', nec: 'q9' }, { id: 5, nome: "Interação Social", comp: 'q5', nec: 'q10' }
+            ];
+            dimensoes.forEach(d => {
+                const compResp = respostas[d.comp]; const necResp = respostas[d.nec];
+                const compTexto = textos[d.comp][compResp].charAt(0).toUpperCase() + textos[d.comp][compResp].slice(1);
+                const necTexto = textos[d.nec][necResp].charAt(0).toUpperCase() + textos[d.nec][necResp].slice(1);
+                const classeConflito = compResp !== necResp ? 'class="conflito"' : '';
+                tabelaContrasteHTML += `<tr ${classeConflito}><td><strong>${d.nome}</strong></td><td>${compTexto}</td><td>${necTexto}</td></tr>`;
+            });
+            tabelaContrasteHTML += `</table>`;
+
+            const analiseConflitos = `<p>As linhas destacadas indicam os principais pontos de atenção. São situações onde a forma como você age é diferente do que você precisa do ambiente. Esses desalinhamentos são os maiores <strong>gatilos de estresse</strong>.</p>`;
+            
+            let analiseEstresse = `<p>Suas respostas na Seção 3 refletem o que acontece quando suas necessidades não são atendidas. Por exemplo:</p><ul>`;
+            if (respostas.q9 === 'b' && respostas.q4 === 'a') analiseEstresse += `<li>Quando precisa de <strong>estrutura</strong> mas o ambiente é caótico, sua reação é: <strong>${textos.q14[respostas.q14]}</strong>.</li>`;
+            if (respostas.q10 === 'a' && respostas.q5 === 'b') analiseEstresse += `<li>Quando precisa <strong>ser incluído(a)</strong> mas se sente ignorado(a), sua reação é: <strong>${textos.q15[respostas.q15]}</strong>.</li>`;
+            if (respostas.q8 === 'a' && respostas.q3 === 'b') analiseEstresse += `<li>Quando precisa de <strong>diretividade</strong> mas a comunicação é vaga, sua reação é: <strong>${textos.q13[respostas.q13]}</strong>.</li>`;
+            if(analiseEstresse.length < 150) { analiseEstresse += `<li>Sua reação ao ser forçado(a) a um ritmo que não é o seu ideal (muito lento ou muito rápido) é: <strong>${textos.q12[respostas.q12]}</strong>.</li>`; }
+            analiseEstresse += `</ul>`;
+
+            const interesses = `<ul><li><strong>Realização:</strong> ${textos.q16[respostas.q16]}</li><li><strong>Atividades Ideais:</strong> ${textos.q17[respostas.q17]}</li><li><strong>Afinidade Natural:</strong> ${textos.q18[respostas.q18]}</li></ul><p>Seus interesses sugerem que você se sentiria mais energizado(a) em carreiras ou projetos que combinem esses elementos.</p>`;
+            
+            const recomendacoes = `<p>Com base na sua análise, aqui estão algumas estratégias para aumentar sua satisfação e eficácia:</p><ul><li><strong>Comunique suas Necessidades:</strong> Preste atenção especial às linhas de conflito na tabela. Encontre maneiras de verbalizar o que você precisa. Ex: "Eu consigo me adaptar, mas para entregar meu melhor trabalho, preciso de um plano claro."</li><li><strong>Escolha seu Ambiente:</strong> Ao procurar um novo emprego ou projeto, avalie se a cultura da empresa oferece o suporte que você precisa (sua coluna de 'Necessidades').</li><li><strong>Gerencie seu Estresse:</strong> Agora que você conhece seus gatilhos, pode se preparar. Se vai entrar em um ambiente caótico e precisa de estrutura, crie seu próprio mini-plano antes.</li><li><strong>Alinhe com seus Interesses:</strong> Busque maneiras de incorporar mais das suas fontes de energia no seu trabalho diário.</li></ul>`;
+            
+            return { titulo, retratoGeral, tabelaContrasteHTML, analiseConflitos, analiseEstresse, interesses, recomendacoes };
+        }
+
+        function imprimirResultado() {
+            window.print();
+        }
+    </script>
+
+</body>
+</html>
